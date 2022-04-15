@@ -109,15 +109,9 @@ public class HolidayManagementDTO {
     }
     
     public void deleteUser(int employeeId){
-    	int isSuccessful = em.createQuery("delete from Employee e where e.employeeId =:employeeId")
-                .setParameter("employeeId", employeeId)
-                .executeUpdate();
+    	Employee s=em.find(Employee.class,employeeId);
+    	em.remove(s);
        
-    }
-    
-    public void test() {
-    	String s = new String();
-    	s = "aaa";
     }
     
     

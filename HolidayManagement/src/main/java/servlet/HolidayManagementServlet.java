@@ -133,8 +133,10 @@ public class HolidayManagementServlet extends HttpServlet {
 			
 			hmDTO.insertEmployeeWithDetails(idDepartment, idRole, firstName, lastName, date, phone, employeeEmail, employeePwd);
 
-			tableStr += " <br/><strong>Employee is inserted </strong>";
+			response.sendRedirect("HolidayManagementServlet?action=listUsers");
+			
 		}
+		break;
 		case "listUsers":
 		{
 			 listUser(request, response);
@@ -145,7 +147,7 @@ public class HolidayManagementServlet extends HttpServlet {
 			showEditForm(request, response);
 			
 		}
-		
+		break;
 		case "deleteUser":{
 			deleteUser(request,response);
 		}
@@ -160,6 +162,9 @@ public class HolidayManagementServlet extends HttpServlet {
 		default:
 			if(param_action.contains("edit")) {
 				showEditForm(request, response);
+			}
+			else if(param_action.contains("delete")) {
+				deleteUser(request,response);
 			}
 		}
 		response.setContentType("text/html;charset=UTF-8");
@@ -194,7 +199,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		        request.setAttribute("listUser", listUser);
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("employeeListForm.jsp");
 		        dispatcher.forward(request, response);
-		    }//kkkk
+		    }
 	
 	
 		 private void deleteUser(HttpServletRequest request, HttpServletResponse response)
