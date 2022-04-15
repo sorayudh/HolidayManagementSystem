@@ -116,7 +116,8 @@ public class HolidayManagementDTO {
     }
     
     public void test() {
-    	
+    	String s = new String();
+    	s = "aaa";
     }
     
     
