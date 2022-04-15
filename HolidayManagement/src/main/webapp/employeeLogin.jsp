@@ -23,7 +23,7 @@
         <%
 		if (request.getParameter("txtName") != null && request.getParameter("txtPwd") != null)
 		{
-			RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=login");
+			RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=employeelogin");
 			request.setAttribute("action", "login");
 			request.setAttribute("txtName", request.getParameter("txtName"));
 			request.setAttribute("txtPwd", request.getParameter("txtPwd"));
