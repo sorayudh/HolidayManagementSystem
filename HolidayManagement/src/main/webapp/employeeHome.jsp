@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Admin Home</title>
+<title>Employee Home</title>
 </head>
 <body>
 <div class="wrapper">
@@ -12,11 +12,10 @@
         
 
         <form class="form">
-          <h2>Welcome to Home Page</h2>
+          <h2>Welcome to Employee Home Page</h2>
 
-<a href='HolidayManagementServlet?action=showAllEmployee'>View All Employees</a><br/>
-<a href='HolidayManagementServlet?action=addEmployee'>Add a New Employee</a><br/>
-<a href='HolidayManagementServlet?action=listUsers'>Employee List</a><br/>
+<a href='submitRequest.jsp'>Submit Holiday Request</a><br/>
+
 
         </form>
     </div>

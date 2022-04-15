@@ -14,7 +14,7 @@ import javax.persistence.TypedQuery;
 
 import model.Department;
 import model.Employee;
-
+import model.HolidayRequest;
 import model.Role;
 
 
@@ -112,6 +112,17 @@ public class HolidayManagementDTO {
     	Employee s=em.find(Employee.class,employeeId);
     	em.remove(s);
        
+    }
+    
+    public void submitRequest(String reason, Date fromdate, Date todate)
+    {
+    	HolidayRequest h = new HolidayRequest();
+    	h.setReason(reason);
+    	h.setFromDate(fromdate);
+    	h.setToDate(todate);
+    
+    	
+    	em.persist(h);
     }
     
     

@@ -69,6 +69,20 @@ public class HolidayManagementServlet extends HttpServlet {
 			
 		}
 		break;
+		case "employeelogin":
+		{
+			String username = request.getParameter("txtName");
+			String password = request.getParameter("txtPwd");
+			Boolean output = hmDTO.checkUser(username, password);
+			if(output) {
+				RequestDispatcher dispatcher = request.getRequestDispatcher("employeeHome.jsp");
+				dispatcher.forward(request, response);
+			}
+			else {
+				tableStr += "<br/><strong>Please check username and password</strong>";
+			}
+		}
+		break;
 		case "showAllEmployee":
 		{
 			List<Employee> employeelist = hmDTO.allEmployee();
@@ -158,7 +172,15 @@ public class HolidayManagementServlet extends HttpServlet {
 			updateUser(request,response);
 		}
 		break;
-		
+		case "submitRequest":
+		{
+			String reason = request.getParameter("reason");
+			String fromdate = request.getParameter("fromdate");
+			String todate = request.getParameter("todate");
+			
+			
+		}
+		break;
 		default:
 			if(param_action.contains("edit")) {
 				showEditForm(request, response);
