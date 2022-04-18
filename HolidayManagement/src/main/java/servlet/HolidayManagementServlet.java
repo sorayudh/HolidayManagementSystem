@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import dao.HolidayManagementDTO;
 import model.Department;
 import model.Employee;
+import model.HolidayRequest;
 import model.Role;
 
 
@@ -180,6 +181,17 @@ public class HolidayManagementServlet extends HttpServlet {
 			
 		}
 		break;
+		case "listHolidayRequests":
+		{
+			listHolidayRequest(request, response);
+	          
+		}
+		break;
+		case "approveRequest":
+		{
+			approveRequest(request, response);
+		}
+		break;
 		default:
 			if(param_action.contains("edit")) {
 				showEditForm(request, response);
@@ -217,8 +229,23 @@ public class HolidayManagementServlet extends HttpServlet {
 		        request.setAttribute("listUser", listUser);
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("employeeListForm.jsp");
 		        dispatcher.forward(request, response);
-		    }//kkkk
+		    }
 	
+	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException{
+		        List<HolidayRequest> listHolidayRequest = hmDTO.getAllHolidayRequest();
+		        request.setAttribute("listHolidayRequest", listHolidayRequest);
+		        RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
+		        dispatcher.forward(request, response);
+		    }
+	
+	private void approveRequest(HttpServletRequest request, HttpServletResponse response)
+		    throws IOException {
+	 var id = request.getQueryString().substring(request.getQueryString().lastIndexOf("holidayRequestId=")+11);
+	 int holidayRequestId = Integer.parseInt(id);
+	 hmDTO.approveRequest(holidayRequestId);
+	 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
+		    }
 	
 		 private void deleteUser(HttpServletRequest request, HttpServletResponse response)
 				    throws IOException {
