@@ -1,9 +1,11 @@
 package dao;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -11,10 +13,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.servlet.http.HttpSession;
 
 import model.Department;
 import model.Employee;
 import model.HolidayRequest;
+import model.RequestStatus;
 import model.Role;
 
 
@@ -37,6 +41,7 @@ public class HolidayManagementDTO {
     	TypedQuery<Employee> query = em.createQuery(
     			  "SELECT e FROM Employee e WHERE e.email = :username" , Employee.class);
     			Employee employee = query.setParameter("username", username).getSingleResult();
+    			//HttpSession session = request.getSession();
     			return employee.getPassword().equals(password);
     }
     
@@ -117,11 +122,19 @@ public class HolidayManagementDTO {
     public void submitRequest(String reason, Date fromdate, Date todate)
     {
     	HolidayRequest h = new HolidayRequest();
+    	
+    	RequestStatus rs = em.find(RequestStatus.class, 3); // 3 is waiting for approval
+    	
     	h.setReason(reason);
     	h.setFromDate(fromdate);
     	h.setToDate(todate);
-    
-    	
+    	h.setRequestStatus(rs);
+    	h.setRequestTime(new Date());
+    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getFromDate().getTime() - h.getToDate().getTime(), TimeUnit.MILLISECONDS));
+    	//userId
+    	//noconstainttime
+    	//breakingcontraints
+    	//priority
     	em.persist(h);
     }
     

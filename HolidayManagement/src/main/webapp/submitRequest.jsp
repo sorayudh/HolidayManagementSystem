@@ -19,16 +19,16 @@
 	</form>
 	
 	<%
-		if (request.getParameter("reason") != null)
-		{
-			RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=submitRequest");
-			request.setAttribute("action", "submitRequest");
-			request.setAttribute("reason", request.getParameter("reason"));
-			request.setAttribute("fromdate", request.getParameter("fromdate"));
-			request.setAttribute("todate", request.getParameter("todate"));
-			rd.forward(request, response);
-			
-		}
+	if (request.getParameter("reason") != null)
+	{
+		RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=submitRequest");
+		request.setAttribute("action", "submitRequest");
+		request.setAttribute("reason", request.getParameter("reason"));
+		request.setAttribute("fromdate", request.getParameter("fromdate"));
+		request.setAttribute("todate", request.getParameter("todate"));
+		rd.forward(request, response);
+		
+	}
 	%>
 
 
