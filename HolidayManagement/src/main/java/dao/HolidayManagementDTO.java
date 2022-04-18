@@ -70,6 +70,11 @@ public class HolidayManagementDTO {
     	return listEmployee;
     }
     
+    public List<HolidayRequest> getAllHolidayRequest(){
+    	List<HolidayRequest> listHolidayRequest = em.createNamedQuery("HolidayRequest.findAll", HolidayRequest.class).getResultList();
+    	return listHolidayRequest;
+    }
+    
     public List<Department> allDepartment()
     {
     	List<Department> listDepartment = em.createNamedQuery("Department.findAll", Department.class).getResultList();
@@ -119,6 +124,16 @@ public class HolidayManagementDTO {
        
     }
     
+<<<<<<< HEAD
+=======
+    public void approveRequest(int holidayRequestId){
+    	int isSuccessful = em.createQuery("update HolidayRequest h set requestStatus = '1' where h.holidayRequestId =:holidayRequestId")
+                .setParameter("holidayRequestId", holidayRequestId)
+                .executeUpdate();
+       
+    }
+    
+>>>>>>> branch 'master' of https://github.com/sorayudh/HolidayManagementSystem
     public void submitRequest(String reason, Date fromdate, Date todate)
     {
     	HolidayRequest h = new HolidayRequest();
