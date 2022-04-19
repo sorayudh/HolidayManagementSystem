@@ -6,8 +6,12 @@ import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
 import javax.servlet.RequestDispatcher;
@@ -51,7 +55,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		String param_action = request.getParameter("action");
 		String tableStr = new String();
-
+		checkDates();
 		
 		switch(param_action) {
 		//login
@@ -190,7 +194,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		break;
 		case "approveRequest":
 		{
-			approveRequest(request, response);
+			approveOrRejectRequest(request, response,"approve");
 		}
 		break;
 		default:
@@ -199,6 +203,12 @@ public class HolidayManagementServlet extends HttpServlet {
 			}
 			else if(param_action.contains("delete")) {
 				deleteUser(request,response);
+			}
+			else if(param_action.contains("approveRequest")) {
+				approveOrRejectRequest(request, response,"approve");
+			}
+			else if(param_action.contains("rejectRequest")) {
+				approveOrRejectRequest(request, response,"reject");
 			}
 		}
 		response.setContentType("text/html;charset=UTF-8");
@@ -238,17 +248,32 @@ public class HolidayManagementServlet extends HttpServlet {
 	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException{
 		        List<HolidayRequest> listHolidayRequest = hmDTO.getAllHolidayRequest();
+		        List<HolidayRequest> listApprovedHolidayRequest = hmDTO.allApprovedRequest();
+		        List<HolidayRequest> listRejectedHolidayRequest = hmDTO.allRejectedRequest();
+		        List<HolidayRequest> listCancelledHolidayRequest = hmDTO.allCancelledRequest();
+
 		        request.setAttribute("listHolidayRequest", listHolidayRequest);
+		        request.setAttribute("allApprovedRequestList", listApprovedHolidayRequest);
+		        request.setAttribute("allRejectedRequestList", listRejectedHolidayRequest);
+		        request.setAttribute("allCancelledHolidayRequest", listCancelledHolidayRequest);
+
+		        
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 		        dispatcher.forward(request, response);
 		    }
 	
-	private void approveRequest(HttpServletRequest request, HttpServletResponse response)
+	private void approveOrRejectRequest(HttpServletRequest request, HttpServletResponse response,String toDo)
 		    throws IOException {
-	 var id = request.getQueryString().substring(request.getQueryString().lastIndexOf("holidayRequestId=")+11);
-	 int holidayRequestId = Integer.parseInt(id);
-	 hmDTO.approveRequest(holidayRequestId);
-	 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
+		 var id = request.getQueryString().substring(request.getQueryString().lastIndexOf("holidayRequestId=")+17);
+		 int holidayRequestId = Integer.parseInt(id);
+		 if(toDo=="approve") {
+			 hmDTO.approveRequest(holidayRequestId);
+		 }
+		 else if(toDo=="reject") {
+			 hmDTO.rejectRequest(holidayRequestId);
+		 }
+		
+		 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
 		    }
 	
 		 private void deleteUser(HttpServletRequest request, HttpServletResponse response)
@@ -310,5 +335,17 @@ public class HolidayManagementServlet extends HttpServlet {
 					
 			       
 			    }
+	 
+	 public void checkDates() {
+		 Date date = new Date();
+		 Calendar calendar = new GregorianCalendar();
+		 calendar.setTime(date);
+		 int year = calendar.get(Calendar.YEAR);
+		 LocalDate startDate = LocalDate.parse(year+"-12-23");
+		 LocalDate endDate = LocalDate.parse(year+1+"-01-03"); 
+		 var ListDate = startDate.datesUntil(endDate).collect(Collectors.toList());
+		
+	 }
+	 
 	 
 }

@@ -12,6 +12,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpSession;
 
@@ -45,6 +46,8 @@ public class HolidayManagementDTO {
     			return employee.getPassword().equals(password);
     }
     
+  
+    
     public List<Employee> allEmployee(){
     	List queryResults = em.createQuery("SELECT e FROM Employee e").getResultList();
     	List<Employee> listResult = new ArrayList<Employee>();
@@ -59,9 +62,44 @@ public class HolidayManagementDTO {
     	return listResult;
     }
     
+    public List<HolidayRequest> getAllHolidayRequest(){
+  	  Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
+  	          + " WHERE h.requestStatus = 3");
+  	  return getHolidayList(query.getResultList());
+  }
+    
+    public List<HolidayRequest> allApprovedRequest() {
+        Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
+          + " WHERE h.requestStatus = 1");
+        return getHolidayList(query.getResultList());
+    }
+    
+    
+    public List<HolidayRequest> allRejectedRequest() {
+        Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
+          + " WHERE h.requestStatus = 2");
+        return getHolidayList(query.getResultList());
+    }
+    
+    public List<HolidayRequest> allCancelledRequest() {
+        Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
+          + " WHERE h.requestStatus = 4");
+        return getHolidayList(query.getResultList());
+    }
+    
+    public List<HolidayRequest> getHolidayList(List output){
+   	 List<HolidayRequest> listResult = new ArrayList<HolidayRequest>();
+   	 for(int i = 0; i < output.size(); i++)
+    	{
+        	HolidayRequest e = new HolidayRequest();
+    		e = (HolidayRequest)output.get(i);
+    		listResult.add(e);
+    	}
+        return listResult;
+   }
+    
     public Employee getEmployeeDetail(int employeeId){
-    	Employee employee =  em.find(Employee.class, employeeId); //em.createNamedQuery("Employee.findAll", Employee.class).getResultList();
-    	//employee.setDepartment(em.find(Department.class, employee.getDepartment().getDepartmentId()));
+    	Employee employee =  em.find(Employee.class, employeeId); 
     	return employee;
     }
     
@@ -70,10 +108,7 @@ public class HolidayManagementDTO {
     	return listEmployee;
     }
     
-    public List<HolidayRequest> getAllHolidayRequest(){
-    	List<HolidayRequest> listHolidayRequest = em.createNamedQuery("HolidayRequest.findAll", HolidayRequest.class).getResultList();
-    	return listHolidayRequest;
-    }
+  
     
     public List<Department> allDepartment()
     {
@@ -121,19 +156,23 @@ public class HolidayManagementDTO {
     public void deleteUser(int employeeId){
     	Employee s=em.find(Employee.class,employeeId);
     	em.remove(s);
-       
+    	
     }
     
-<<<<<<< HEAD
-=======
+
     public void approveRequest(int holidayRequestId){
-    	int isSuccessful = em.createQuery("update HolidayRequest h set requestStatus = '1' where h.holidayRequestId =:holidayRequestId")
-                .setParameter("holidayRequestId", holidayRequestId)
-                .executeUpdate();
-       
+    	HolidayRequest hr = em.find(HolidayRequest.class,holidayRequestId);
+    	hr.setRequestStatus(em.find(RequestStatus.class, 1));
+    	em.merge(hr);
     }
     
->>>>>>> branch 'master' of https://github.com/sorayudh/HolidayManagementSystem
+    public void rejectRequest(int holidayRequestId){
+    	HolidayRequest hr = em.find(HolidayRequest.class,holidayRequestId);
+    	hr.setRequestStatus(em.find(RequestStatus.class, 2));
+    	em.merge(hr);
+    }
+    
+    
     public void submitRequest(String reason, Date fromdate, Date todate)
     {
     	HolidayRequest h = new HolidayRequest();
