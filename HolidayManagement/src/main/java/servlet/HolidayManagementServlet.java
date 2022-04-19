@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,8 +39,9 @@ import model.Role;
 public class HolidayManagementServlet extends HttpServlet {
 	@EJB
 	private HolidayManagementDTO hmDTO;
-       
+    List<LocalDate> AllDates;
 	private static final long serialVersionUID = 1L;
+	
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -46,6 +49,8 @@ public class HolidayManagementServlet extends HttpServlet {
     public HolidayManagementServlet() {
         super();
         // TODO Auto-generated constructor stub
+        AllDates = new ArrayList<LocalDate>();
+        checkDates();
     }
 
 	/**
@@ -55,7 +60,8 @@ public class HolidayManagementServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		String param_action = request.getParameter("action");
 		String tableStr = new String();
-		checkDates();
+		HttpSession userSession = request.getSession();
+		//checkDates();
 		
 		switch(param_action) {
 		//login
@@ -63,9 +69,10 @@ public class HolidayManagementServlet extends HttpServlet {
 		{
 			String username = request.getParameter("txtName");
 			String password = request.getParameter("txtPwd");
-			Boolean output = hmDTO.checkUser(username, password);
-			if(output) {
+			Employee output = hmDTO.checkUser(username, password);
+			if(output.getEmployeeId()!=0) {
 				RequestDispatcher dispatcher = request.getRequestDispatcher("adminHome.jsp");
+				userSession.setAttribute("employeeDetail", output);
 				dispatcher.forward(request, response);
 			}
 			else {
@@ -78,9 +85,10 @@ public class HolidayManagementServlet extends HttpServlet {
 		{
 			String username = request.getParameter("txtName");
 			String password = request.getParameter("txtPwd");
-			Boolean output = hmDTO.checkUser(username, password);
-			if(output) {
+			Employee output = hmDTO.checkUser(username, password);
+			if(output.getEmployeeId()!=0) {
 				RequestDispatcher dispatcher = request.getRequestDispatcher("employeeHome.jsp");
+				userSession.setAttribute("employeeDetail", output);
 				dispatcher.forward(request, response);
 			}
 			else {
@@ -182,6 +190,22 @@ public class HolidayManagementServlet extends HttpServlet {
 			String reason = request.getParameter("reason");
 			String fromdate = request.getParameter("fromdate");
 			String todate = request.getParameter("todate");
+			Employee employee = (Employee) userSession.getAttribute("employeeDetail");
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Boolean noConstraints = false;
+			try {
+				var fdate = formatter.parse(fromdate);
+				var tdate = formatter.parse(todate);
+				if(AllDates.contains(convertToLocalDateViaInstant(fdate)) && AllDates.contains(convertToLocalDateViaInstant(tdate))) {
+					noConstraints=true;
+				}
+				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				tableStr += "<br/><strong>Something went wrong</strong>";
+			}
+			
 			
 			
 		}
@@ -343,9 +367,15 @@ public class HolidayManagementServlet extends HttpServlet {
 		 int year = calendar.get(Calendar.YEAR);
 		 LocalDate startDate = LocalDate.parse(year+"-12-23");
 		 LocalDate endDate = LocalDate.parse(year+1+"-01-03"); 
-		 var ListDate = startDate.datesUntil(endDate).collect(Collectors.toList());
+		 AllDates = startDate.datesUntil(endDate).collect(Collectors.toList());
 		
 	 }
+	 
+	 public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+		    return dateToConvert.toInstant()
+		      .atZone(ZoneId.systemDefault())
+		      .toLocalDate();
+		}
 	 
 	 
 }

@@ -37,13 +37,20 @@ public class HolidayManagementDTO {
     public HolidayManagementDTO() {
         // TODO Auto-generated constructor stub
     }
-    public Boolean checkUser(String username,String password) 
+    public Employee checkUser(String username,String password) 
     {
-    	TypedQuery<Employee> query = em.createQuery(
-    			  "SELECT e FROM Employee e WHERE e.email = :username" , Employee.class);
-    			Employee employee = query.setParameter("username", username).getSingleResult();
-    			//HttpSession session = request.getSession();
-    			return employee.getPassword().equals(password);
+    	try {
+    		TypedQuery<Employee> query = em.createQuery(
+      			  "SELECT e FROM Employee e WHERE e.email = :username" , Employee.class);
+      			Employee employee = query.setParameter("username", username).getSingleResult();
+      			
+      			return employee;
+      			
+    	}
+    	catch(Exception e) {
+    		Employee employee = new Employee();
+    		return employee;
+    	}
     }
     
   
@@ -162,7 +169,10 @@ public class HolidayManagementDTO {
 
     public void approveRequest(int holidayRequestId){
     	HolidayRequest hr = em.find(HolidayRequest.class,holidayRequestId);
+    	Employee e = hr.getEmployee();
+    	e.setHolidaysRemaining(e.getHolidaysRemaining() - hr.getTotalDays());
     	hr.setRequestStatus(em.find(RequestStatus.class, 1));
+    	hr.setEmployee(e);
     	em.merge(hr);
     }
     
@@ -173,23 +183,32 @@ public class HolidayManagementDTO {
     }
     
     
-    public void submitRequest(String reason, Date fromdate, Date todate)
+    public void submitRequest(String reason, Date fromdate, Date todate,Employee employee,Boolean noConstraints)
     {
     	HolidayRequest h = new HolidayRequest();
     	
     	RequestStatus rs = em.find(RequestStatus.class, 3); // 3 is waiting for approval
+    	
     	
     	h.setReason(reason);
     	h.setFromDate(fromdate);
     	h.setToDate(todate);
     	h.setRequestStatus(rs);
     	h.setRequestTime(new Date());
-    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getFromDate().getTime() - h.getToDate().getTime(), TimeUnit.MILLISECONDS));
-    	//userId
-    	//noconstainttime
-    	//breakingcontraints
-    	//priority
+    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getToDate().getTime() - h.getFromDate().getTime(), TimeUnit.MILLISECONDS));
+    	h.setEmployee(employee);
+    	h.setPriority(getPriority(employee.getHolidaysRemaining()));
+    	h.setNoConstraintTime((byte) (noConstraints ? 1 : 0 ));
     	em.persist(h);
+    }
+    
+    public int getPriority(int noOfDaysLeft) {
+    	return noOfDaysLeft >= 26 && noOfDaysLeft <= 30 ? 1 : 
+    		noOfDaysLeft >= 21 && noOfDaysLeft <= 25 ? 2 :
+    			noOfDaysLeft >= 16 && noOfDaysLeft <= 20 ? 3 :
+    				noOfDaysLeft >= 11 && noOfDaysLeft <= 15 ? 4 :
+    					noOfDaysLeft >= 6 && noOfDaysLeft <= 10 ? 5 :
+    		6; 
     }
     
     
