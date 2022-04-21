@@ -6,13 +6,17 @@
 	<title>Holiday Request Management</title>
 </head>
 <body>
+<form method="POST">
+
 	<center>
 		<h1>Holiday Request Management</h1>
         
 	</center>
     <div align="center">
+    
         <table border="1" cellpadding="5">
             <caption><h2>List of Holiday Request</h2></caption>
+            
             <tr>
                 <th>Request ID</th>
                 <th>Employee First Name</th>
@@ -54,12 +58,7 @@
                 </tr>
             </c:forEach>
         </table>
-    </div>	
-    
-    
-    
-    
-    
+    </div>
     
     
     
@@ -171,6 +170,20 @@
         </table>
     </div>
     
-    
+    </form>
 </body>
 </html>
+
+<style>
+
+#filterByName {
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
+  width: 73%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+</style>

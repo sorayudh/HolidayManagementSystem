@@ -40,6 +40,11 @@ public class HolidayManagementServlet extends HttpServlet {
 	@EJB
 	private HolidayManagementDTO hmDTO;
     List<LocalDate> AllDates;
+    List<HolidayRequest> listHolidayRequest;
+    List<HolidayRequest> listApprovedHolidayRequest;
+    List<HolidayRequest> listRejectedHolidayRequest;
+    List<HolidayRequest> listCancelledHolidayRequest;
+    List<Employee> allUserList;
 	private static final long serialVersionUID = 1L;
 	
        
@@ -50,6 +55,11 @@ public class HolidayManagementServlet extends HttpServlet {
         super();
         // TODO Auto-generated constructor stub
         AllDates = new ArrayList<LocalDate>();
+        listHolidayRequest = new ArrayList<HolidayRequest>();
+        listApprovedHolidayRequest = new ArrayList<HolidayRequest>();
+        listRejectedHolidayRequest = new ArrayList<HolidayRequest>();
+        listCancelledHolidayRequest = new ArrayList<HolidayRequest>();
+        allUserList = new ArrayList<Employee>();
         checkDates();
     }
 
@@ -249,6 +259,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		out.println("</html>");
 		out.close();
 	}
+
 	
 	
 
@@ -271,17 +282,18 @@ public class HolidayManagementServlet extends HttpServlet {
 	
 	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException{
-		        List<HolidayRequest> listHolidayRequest = hmDTO.getAllHolidayRequest();
-		        List<HolidayRequest> listApprovedHolidayRequest = hmDTO.allApprovedRequest();
-		        List<HolidayRequest> listRejectedHolidayRequest = hmDTO.allRejectedRequest();
-		        List<HolidayRequest> listCancelledHolidayRequest = hmDTO.allCancelledRequest();
-
+		        listHolidayRequest = hmDTO.getAllHolidayRequest();
+		        listApprovedHolidayRequest = hmDTO.allApprovedRequest();
+		        listRejectedHolidayRequest = hmDTO.allRejectedRequest();
+		        listCancelledHolidayRequest = hmDTO.allCancelledRequest();
+		        allUserList = hmDTO.getAllEmployee();
 		        request.setAttribute("listHolidayRequest", listHolidayRequest);
 		        request.setAttribute("allApprovedRequestList", listApprovedHolidayRequest);
 		        request.setAttribute("allRejectedRequestList", listRejectedHolidayRequest);
 		        request.setAttribute("allCancelledHolidayRequest", listCancelledHolidayRequest);
 
-		        
+		        HttpSession session = request.getSession();
+				session.setAttribute("userList", allUserList);
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 		        dispatcher.forward(request, response);
 		    }
