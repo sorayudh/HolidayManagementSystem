@@ -174,6 +174,23 @@ public class HolidayManagementServlet extends HttpServlet {
 			
 		}
 		break;
+		case "filterByEmployee":
+		{
+			List<Employee> Employeelist = hmDTO.getAllEmployee();
+			 
+			HttpSession session = request.getSession();
+			session.setAttribute("Employeelist", Employeelist);
+			
+			RequestDispatcher dispatcher = request.getRequestDispatcher("filterByEmployee.jsp");
+			dispatcher.forward(request, response);
+			
+		}
+		break;
+		case "viewRequestByEmployee":
+		{
+			
+		}
+		break;
 		case "listUsers":
 		{
 			 listUser(request, response);

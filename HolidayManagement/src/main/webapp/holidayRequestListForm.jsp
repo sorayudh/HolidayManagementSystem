@@ -10,6 +10,8 @@
 
 	<center>
 		<h1>Holiday Request Management</h1>
+		
+		<a href="HolidayManagementServlet?action=filterByEmployee">View Request Filter by Employee</a>
         
 	</center>
     <div align="center">
