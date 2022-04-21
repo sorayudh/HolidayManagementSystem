@@ -186,6 +186,14 @@ public class HolidayManagementServlet extends HttpServlet {
 			
 		}
 		break;
+		
+		case "filter":
+		{
+			String name = request.getParameter("filterByName");
+			filterData(request,response,name.toLowerCase());
+			break;
+		}
+		
 		case "viewRequestByEmployee":
 		{
 			
@@ -296,6 +304,25 @@ public class HolidayManagementServlet extends HttpServlet {
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("employeeListForm.jsp");
 		        dispatcher.forward(request, response);
 		    }
+	
+	private void filterData(HttpServletRequest request, HttpServletResponse response,String name) throws ServletException, IOException{
+		if(name!=null) {
+			var flist = listHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+			 request.setAttribute("listHolidayRequest", flist);
+			 
+			 var alist = listApprovedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+			 request.setAttribute("allApprovedRequestList", alist);
+			 
+			 var rlist = listRejectedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+		     request.setAttribute("allRejectedRequestList", rlist);
+		        
+		     var clist = listCancelledHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+		     request.setAttribute("allCancelledHolidayRequest", clist);
+		     
+		     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
+			 dispatcher.forward(request, response);
+		}
+	}
 	
 	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException{
