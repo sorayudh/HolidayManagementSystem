@@ -265,7 +265,7 @@ public class HolidayManagementDTO {
     	h.setToDate(todate);
     	h.setRequestStatus(rs);
     	h.setRequestTime(new Date());
-    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getToDate().getTime() - h.getFromDate().getTime(), TimeUnit.MILLISECONDS));
+    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getToDate().getTime() - h.getFromDate().getTime(), TimeUnit.MILLISECONDS) + 1);
     	h.setEmployee(employee);
     	h.setPriority(getPriority(employee.getHolidaysRemaining()));
     	h.setNoConstraintTime((byte) (noConstraints ? 1 : 0 ));
