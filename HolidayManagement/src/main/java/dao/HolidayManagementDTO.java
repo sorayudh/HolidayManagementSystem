@@ -161,11 +161,6 @@ public class HolidayManagementDTO {
     	return listRole;
     }
     
-    public void filterbyemployee()
-    {
-    	
-    }
-    
     public void insertEmployeeWithDetails(int idDepartment, int idRole, String firstName, String lastName, Date dob,BigInteger phone, String employeeEmail, String password)
     {
     	Department a = em.find(Department.class, idDepartment);
@@ -203,7 +198,7 @@ public class HolidayManagementDTO {
         	c.setPhoneNo(new BigInteger(phone));
         	c.setEmail(employeeEmail);
         	c.setPassword(password);
-        	c.setDateOfJoining(new Date());
+        	c.setDateOfJoining(newde Date());
         	c.setHolidaysRemaining(30);
         	c.setDepartment(a);
         	c.setRole(w);
@@ -227,6 +222,13 @@ public class HolidayManagementDTO {
     	em.merge(employeeObj);
     	
     }
+    
+//    public boolean checkHeadOrDeputyHeadOnDuty(int departmentId,Date fromdate, Date todate) {
+//    	
+//    	
+//    }
+    
+    
     
     public void deleteUser(int employeeId){
     	Employee s=em.find(Employee.class,employeeId);

@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
@@ -236,6 +237,9 @@ public class HolidayManagementServlet extends HttpServlet {
 					noConstraints=true;
 				}
 				
+				boolean checkHolidayRemaining = isHolidayRemaining(employee,fdate,tdate);
+				//boolean checkHeadOrDeputyHead = checkHeadOrDeputyHeadonDuty(fdate,tdate);
+				
 				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints);
 				
 				response.sendRedirect("HolidayManagementServlet?action=employeeRequestList");
@@ -391,8 +395,6 @@ public class HolidayManagementServlet extends HttpServlet {
 	
 	private void showEditForm(HttpServletRequest request, HttpServletResponse response)
 		    throws ServletException, IOException {
-		        //int id = Integer.parseInt(request.getParameter("employeeId"));
-				//var id = request.getParameter("employeeId");
 				var id = request.getQueryString().substring(request.getQueryString().lastIndexOf("employeeId=")+11);
 		
 				int employeeId = Integer.parseInt(id);
@@ -456,6 +458,19 @@ public class HolidayManagementServlet extends HttpServlet {
 		      .atZone(ZoneId.systemDefault())
 		      .toLocalDate();
 		}
+	 
+	 public boolean isHolidayRemaining(Employee employee,Date fDate,Date tDate) {
+		
+		 var noOfDays = (int)TimeUnit.DAYS.convert(tDate.getTime() - fDate.getTime(), TimeUnit.MILLISECONDS);
+		 if(employee.getHolidaysRemaining() - noOfDays <= 0)
+			 return false;
+		 else
+			 return true;
+	 }
+	 
+//	 public boolean checkHeadOrDeputyHeadonDuty(Date fDate,Date tDate) {
+//		 
+//	 }
 	 
 	 
 }
