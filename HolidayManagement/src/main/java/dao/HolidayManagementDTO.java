@@ -1,6 +1,7 @@
 package dao;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +12,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
@@ -34,6 +36,7 @@ public class HolidayManagementDTO {
     /**
      * Default constructor. 
      */
+	
     public HolidayManagementDTO() {
         // TODO Auto-generated constructor stub
     }
@@ -41,11 +44,14 @@ public class HolidayManagementDTO {
     public Employee checkUser(String username,String password) 
     {
     	try {
+    		Employee employeeNew = new Employee();
     		TypedQuery<Employee> query = em.createQuery(
       			  "SELECT e FROM Employee e WHERE e.email = :username" , Employee.class);
       			Employee employee = query.setParameter("username", username).getSingleResult();
-      			
-      			return employee;
+      			if(employee.getPassword().equals(password))
+      				return employee;
+      			else
+      				return employeeNew;
       			
     	}
     	catch(Exception e) {
@@ -55,6 +61,24 @@ public class HolidayManagementDTO {
     }
     
   
+    public List<Employee> allEmployeeList(){
+    	EntityManager entityManager = 
+    			Persistence.createEntityManagerFactory("HolidayManagement").createEntityManager();
+    	
+    	List queryResults = entityManager.createQuery("SELECT e FROM Employee e").getResultList();
+    	List<Employee> listResult = new ArrayList<Employee>();
+    	
+    	for(int i = 0; i < queryResults.size(); i++)
+    	{
+    		Employee e = new Employee();
+    		e = (Employee)queryResults.get(i);
+    		listResult.add(e);
+    	}
+    	
+    	return listResult;
+    }
+    
+    
     
     public List<Employee> allEmployee(){
     	List queryResults = em.createQuery("SELECT e FROM Employee e").getResultList();
@@ -69,6 +93,13 @@ public class HolidayManagementDTO {
     	
     	return listResult;
     }
+    
+    public List<HolidayRequest> getAllHolidayByEmployeeId(int employeeId){
+    	 Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
+     	          + " WHERE h.employee ="+employeeId);
+     	  return getHolidayList(query.getResultList());
+    }
+    
     
     public List<HolidayRequest> getAllHolidayRequest(){
   	  Query query = em.createQuery("SELECT h FROM HolidayRequest h" 
@@ -157,6 +188,37 @@ public class HolidayManagementDTO {
     	c.setRole(w);
     	
     	em.persist(c);
+    }
+    
+    public boolean addNewEmployee(String idDepartment, String idRole, String firstName, String lastName, String dob,String phone, String employeeEmail, String password) {
+    	try {
+    		Department a = em.find(Department.class, idDepartment);
+        	Role w = em.find(Role.class, idRole);
+        	Employee c = new Employee();
+        	c.setFirstName(firstName);
+        	c.setLastName(lastName);
+        	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        	var dateofbirth = formatter.parse(dob);
+        	c.setDob(dateofbirth);
+        	c.setPhoneNo(new BigInteger(phone));
+        	c.setEmail(employeeEmail);
+        	c.setPassword(password);
+        	c.setDateOfJoining(new Date());
+        	c.setHolidaysRemaining(30);
+        	c.setDepartment(a);
+        	c.setRole(w);
+        	try {
+        		em.persist(c);
+        		return true;
+        	}
+        	catch(Exception e) {
+        		return false;
+        	}
+    	}
+    	catch(Exception e) {
+    		return false;
+    	}
+    	
     }
     
     public void updateEmployee(Employee employeeObj) 

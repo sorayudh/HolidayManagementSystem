@@ -15,6 +15,8 @@
           <h2>Welcome to Employee Home Page</h2>
 
 <a href='submitRequest.jsp'>Submit Holiday Request</a><br/>
+<a href='HolidayManagementServlet?action=employeeRequestList'>Show Holiday Request</a><br/>
+
 
 
         </form>

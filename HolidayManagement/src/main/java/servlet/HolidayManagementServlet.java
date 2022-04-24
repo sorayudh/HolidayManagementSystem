@@ -44,6 +44,7 @@ public class HolidayManagementServlet extends HttpServlet {
     List<HolidayRequest> listApprovedHolidayRequest;
     List<HolidayRequest> listRejectedHolidayRequest;
     List<HolidayRequest> listCancelledHolidayRequest;
+    List<HolidayRequest> listEmployeeRequest;
     List<Employee> allUserList;
 	private static final long serialVersionUID = 1L;
 	
@@ -234,7 +235,13 @@ public class HolidayManagementServlet extends HttpServlet {
 				if(AllDates.contains(convertToLocalDateViaInstant(fdate)) && AllDates.contains(convertToLocalDateViaInstant(tdate))) {
 					noConstraints=true;
 				}
+				
 				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints);
+				
+				response.sendRedirect("HolidayManagementServlet?action=employeeRequestList");
+				
+				
+				
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -256,6 +263,13 @@ public class HolidayManagementServlet extends HttpServlet {
 			approveOrRejectRequest(request, response,"approve");
 		}
 		break;
+		
+		case "employeeRequestList":
+		{
+			listEmployeeRequest(request, response);
+		}
+		break;
+		
 		default:
 			if(param_action.contains("edit")) {
 				showEditForm(request, response);
@@ -322,6 +336,16 @@ public class HolidayManagementServlet extends HttpServlet {
 		     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 			 dispatcher.forward(request, response);
 		}
+	}
+	
+	private void listEmployeeRequest(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException{
+			HttpSession userSession = request.getSession();
+			Employee employee = (Employee) userSession.getAttribute("employeeDetail");
+			listEmployeeRequest = hmDTO.getAllHolidayByEmployeeId(employee.getEmployeeId());
+			 request.setAttribute("listEmployeeRequest", listEmployeeRequest);
+			RequestDispatcher dispatcher = request.getRequestDispatcher("employeeRequestList.jsp");
+			dispatcher.forward(request, response);
 	}
 	
 	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)

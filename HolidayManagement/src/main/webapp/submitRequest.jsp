@@ -4,17 +4,20 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Submit a Holiday Request</title>
+<title>New Holiday Request</title>
 </head>
 <body>
 
-<h2>Submit a Holiday Request</h2>
-	<br/>
-	<form method = "GET">
-		Reason: <input type = "text" name = "reason"><br/><br/>
-		From Date: <input type = "date" name = "fromdate"><br/><br/>
-		To Date: <input type = "date" name = "todate"><br/><br/>
-		
+
+
+<div class="wrapper">
+    <div class="container">
+        <h2>Add a New Holiday Request</h2>
+       <form method = "GET">
+		Reason: <textarea  rows = "4" cols = "40" name = "reason"></textarea>
+		From Date: <input type = "date" name = "fromdate">
+		To Date: <input type = "date" name = "todate">
+		<br/>
 		<input type = "submit" value = "Submit" />
 	</form>
 	
@@ -30,6 +33,23 @@
 		
 	}
 	%>
+	
+	
+    </div>
+
+    <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+</div>
 
 
 </body>
@@ -136,7 +156,7 @@ a:active {
     .container {
         /*max-width: 600px;*/
         margin: 0 auto;
-        padding: 18% 0;
+        padding: 7% 0;
         /*height: 400px;*/
         text-align: center;
     }
@@ -150,6 +170,26 @@ a:active {
         position: relative;
         z-index: 2;
     }
+    
+    form textarea{
+     -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        outline: 0;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.2);
+        width: 250px;
+        border-radius: 3px;
+        padding: 10px 15px;
+        margin: 0 auto 10px auto;
+        display: block;
+        text-align: center;
+        font-size: 18px;
+        color: white;
+        transition-duration: 0.25s;
+        font-weight: 300;
+    }
+    
     form input {
         -webkit-appearance: none;
         -moz-appearance: none;
