@@ -14,7 +14,9 @@
         <form class="form">
           <h2>Welcome to Home Page</h2>
 
+<%-- 
 <a href='HolidayManagementServlet?action=showAllEmployee'>View All Employees</a><br/>
+--%>
 <a href='HolidayManagementServlet?action=addEmployee'>Add a New Employee</a><br/>
 <a href='HolidayManagementServlet?action=listUsers'>Employee List</a><br/>
 <a href='HolidayManagementServlet?action=listHolidayRequests'>Holiday Request List</a><br/>

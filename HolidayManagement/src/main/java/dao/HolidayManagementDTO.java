@@ -198,7 +198,7 @@ public class HolidayManagementDTO {
         	c.setPhoneNo(new BigInteger(phone));
         	c.setEmail(employeeEmail);
         	c.setPassword(password);
-        	c.setDateOfJoining(newde Date());
+        	c.setDateOfJoining(new Date());
         	c.setHolidaysRemaining(30);
         	c.setDepartment(a);
         	c.setRole(w);
