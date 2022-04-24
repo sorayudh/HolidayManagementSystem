@@ -198,7 +198,7 @@ public class HolidayManagementDTO {
         	c.setPhoneNo(new BigInteger(phone));
         	c.setEmail(employeeEmail);
         	c.setPassword(password);
-        	c.setDateOfJoining(newde Date());
+        	c.setDateOfJoining(new Date());
         	c.setHolidaysRemaining(30);
         	c.setDepartment(a);
         	c.setRole(w);
@@ -265,7 +265,7 @@ public class HolidayManagementDTO {
     	h.setToDate(todate);
     	h.setRequestStatus(rs);
     	h.setRequestTime(new Date());
-    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getToDate().getTime() - h.getFromDate().getTime(), TimeUnit.MILLISECONDS));
+    	h.setTotalDays((int)TimeUnit.DAYS.convert(h.getToDate().getTime() - h.getFromDate().getTime(), TimeUnit.MILLISECONDS) + 1);
     	h.setEmployee(employee);
     	h.setPriority(getPriority(employee.getHolidaysRemaining()));
     	h.setNoConstraintTime((byte) (noConstraints ? 1 : 0 ));
