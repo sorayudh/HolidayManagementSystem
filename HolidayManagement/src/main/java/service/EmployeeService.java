@@ -27,7 +27,7 @@ public class EmployeeService {
 	}
 	
 	@WebMethod
-	public boolean verifyLoginUser(String username, String password) {
+	public Employee verifyLoginUser(String username, String password) {
 		return employeeService.verifyLoginUser(username,password);
 	}
 	
