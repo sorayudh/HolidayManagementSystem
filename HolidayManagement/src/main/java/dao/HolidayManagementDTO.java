@@ -23,11 +23,14 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpSession;
 
+
 import model.Admin;
+import model.Constraint;
 import model.Department;
 import model.Employee;
 import model.HolidayRequest;
 import model.RequestStatus;
+import model.RequestWithConstraint;
 import model.Role;
 
 
@@ -248,7 +251,7 @@ public class HolidayManagementDTO {
     }
     
     public boolean checkHeadOrDeputyHeadOnDuty(Date fromDate,Date toDate,int departmentId) {
-    	 TypedQuery<HolidayRequest> query 
+    	 TypedQuery<HolidayRequest> q	uery 
          = em.createQuery(
              "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
              + "((h.fromDate between :fromDate and :toDate) OR "
@@ -258,7 +261,7 @@ public class HolidayManagementDTO {
         		 .setParameter("fromDate", fromDate)
         		 .setParameter("toDate", toDate);
        List<HolidayRequest> resultList = query.getResultList();
-       return resultList.stream().distinct().collect(Collectors.toList()).size() > 1;
+       return resultList.size() > 1 ? false : true ;
     }
     
     public boolean isMaximumStaffOnHoliday(Date fromDate,Date toDate,int departmentId,int minimumReq) {
@@ -278,7 +281,7 @@ public class HolidayManagementDTO {
 
     public int getTotalEmployeeByDept(int departmentId) {
     	TypedQuery<Employee> query = em.createQuery(
-    			"SELECT e from Employee WHERE e.department = "+departmentId,Employee.class);
+    			"SELECT e from Employee e WHERE e.department = "+departmentId,Employee.class);
     	List<Employee> resultList = query.getResultList();
     	return resultList.size();
     }
@@ -324,7 +327,7 @@ public class HolidayManagementDTO {
     }
     
     
-    public void submitRequest(String reason, Date fromdate, Date todate,Employee employee,Boolean noConstraints)
+    public void submitRequest(String reason, Date fromdate, Date todate,Employee employee,Boolean noConstraints,Boolean breakingConstraints,List<Integer> contraintIds)
     {
     	HolidayRequest h = new HolidayRequest();
     	
@@ -340,7 +343,30 @@ public class HolidayManagementDTO {
     	h.setEmployee(employee);
     	h.setPriority(getPriority(employee.getHolidaysRemaining()));
     	h.setNoConstraintTime((byte) (noConstraints ? 1 : 0 ));
+    	h.setBreakingConstraints((byte) (breakingConstraints ? 1 : 0 ));
     	em.persist(h);
+    	if(breakingConstraints) {
+    		em.flush();
+    		insertIntoRecordWithContraint(h,contraintIds);
+    	}
+    		
+    	
+    }
+    
+    public void insertIntoRecordWithContraint(HolidayRequest hr,List<Integer> contraintIds) {
+    	for(int i = 0; i < contraintIds.size();i++) {
+    		Constraint c = em.find(Constraint.class, contraintIds.get(i));
+    		saveRecordWithContraint(hr,c);
+    	}
+    	
+    }
+    
+    public void saveRecordWithContraint(HolidayRequest hr, Constraint c) {
+    	RequestWithConstraint rwc = new RequestWithConstraint();
+    	rwc.setConstraint(c);
+    	rwc.setHolidayRequest(hr);
+    	em.persist(rwc);
+    	em.flush();
     }
     
     public int getPriority(int noOfDaysLeft) {

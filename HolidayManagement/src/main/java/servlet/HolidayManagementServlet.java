@@ -250,6 +250,8 @@ public class HolidayManagementServlet extends HttpServlet {
 			int depId = employee.getDepartment().getDepartmentId();
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			Boolean noConstraints = false;
+			Boolean breakingContraints = false;
+			List<Integer> contraintId=new ArrayList<Integer>();
 			try {
 				var fdate = formatter.parse(fromdate);
 				var tdate = formatter.parse(todate);
@@ -260,9 +262,19 @@ public class HolidayManagementServlet extends HttpServlet {
 					boolean checkHolidayRemaining = isHolidayRemaining(employee,fdate,tdate);
 					boolean checkHeadOrDeputyHead = hmDTO.checkHeadOrDeputyHeadOnDuty(fdate,tdate,depId);
 					boolean checkMinimumStaff = isMinimumStaffPresent(employee.getDepartment().getDepartmentId(),fdate,tdate);
+					if(!checkHolidayRemaining || !checkHeadOrDeputyHead || !checkMinimumStaff) {
+						
+						breakingContraints=true;
+						if(!checkHolidayRemaining)
+							contraintId.add(1);
+						if(!checkHeadOrDeputyHead)
+							contraintId.add(3);
+						if(!checkMinimumStaff)
+							contraintId.add(4);
+					}
 				}
 				
-				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints);
+				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints,breakingContraints,contraintId);
 				
 				response.sendRedirect("HolidayManagementServlet?action=employeeRequestList");
 				
