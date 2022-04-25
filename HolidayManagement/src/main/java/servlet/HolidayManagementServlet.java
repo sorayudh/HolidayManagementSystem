@@ -17,6 +17,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.ejb.EJB;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MapMessage;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import consumer.ReaderConsumer;
 import dao.HolidayManagementDTO;
 import model.Department;
 import model.Employee;
@@ -87,6 +98,8 @@ public class HolidayManagementServlet extends HttpServlet {
 			String password = request.getParameter("txtPwd");
 			Employee output = hmDTO.checkUser(username, password);
 			if(output.getEmployeeId()!=0) {
+				ReaderConsumer reader = new ReaderConsumer();
+				System.out.println("Reader Consumer is started and waiting for message since Admin is Logged in.");
 				RequestDispatcher dispatcher = request.getRequestDispatcher("adminHome.jsp");
 				userSession.setAttribute("employeeDetail", output);
 				dispatcher.forward(request, response);
@@ -245,6 +258,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		break;
 		case "submitRequest":
 		{
+			
 			String reason = request.getParameter("reason");
 			String fromdate = request.getParameter("fromdate");
 			String todate = request.getParameter("todate");
@@ -278,6 +292,8 @@ public class HolidayManagementServlet extends HttpServlet {
 				
 				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints,breakingContraints,contraintId);
 				
+				sendMessage(employee);
+				
 				response.sendRedirect("HolidayManagementServlet?action=employeeRequestList");
 				
 				
@@ -286,6 +302,12 @@ public class HolidayManagementServlet extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				tableStr += "<br/><strong>Something went wrong</strong>";
+			} catch (JMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NamingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
 			
@@ -346,7 +368,24 @@ public class HolidayManagementServlet extends HttpServlet {
 	}
 
 	
-	
+	public void sendMessage(Employee e) throws JMSException, NamingException {
+		Context jndiContext;
+		jndiContext = new InitialContext();
+		
+		ConnectionFactory factory = (ConnectionFactory)jndiContext.lookup("java:/ConnectionFactory");
+		Queue calculationQueue = (Queue) jndiContext.lookup("java:/jms/HolidayRequest");
+		Connection connect = factory.createConnection();	
+		Session session = connect.createSession(false,Session.AUTO_ACKNOWLEDGE);
+		MessageProducer sender = session.createProducer(calculationQueue);
+		MapMessage message = session.createMapMessage();
+		
+		message.setString("employeeName", e.getFirstName()+" "+e.getLastName());
+		
+		System.out.println("Sending Message");
+		
+		sender.send(message);
+		connect.close();	
+	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)

@@ -15,19 +15,10 @@ public class EmployeeService {
 		employeeService= new EmployeeServiceImpl();
 	}
 	
+
 	
 	@WebMethod
-	public List<Employee> getAllEmployees(){
-		return employeeService.getAllEmployees();
-	}
-	
-	@WebMethod
-	public boolean addEmployee(String idDepartment, String idRole, String firstName, String lastName, String dob,String phone, String employeeEmail, String password) {
-		return employeeService.addNewEmployee(idDepartment,idRole,firstName,lastName,dob,phone,employeeEmail,password);
-	}
-	
-	@WebMethod
-	public Employee verifyLoginUser(String username, String password) {
+	public boolean verifyLoginUser(String username, String password) {
 		return employeeService.verifyLoginUser(username,password);
 	}
 	
