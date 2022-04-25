@@ -253,11 +253,10 @@ public class HolidayManagementDTO {
              "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
              + "((h.fromDate between :fromDate and :toDate) OR "
              + "(h.toDate between :fromDate and :toDate)) AND "
-             + "e.department = :departmentId AND "
+             + "e.department = "+departmentId+" AND "
              + "e.role in (1,2) AND h.requestStatus=1", HolidayRequest.class)
         		 .setParameter("fromDate", fromDate)
-        		 .setParameter("toDate", toDate)
-        		 .setParameter("departmentId", String.valueOf(departmentId));
+        		 .setParameter("toDate", toDate);
        List<HolidayRequest> resultList = query.getResultList();
        return resultList.stream().distinct().collect(Collectors.toList()).size() > 1;
     }
@@ -268,11 +267,10 @@ public class HolidayManagementDTO {
              "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
              + "((h.fromDate between :fromDate and :toDate) OR "
              + "(h.toDate between :fromDate and :toDate)) AND "
-             + "e.department = :departmentId AND "
+             + "e.department = "+departmentId+" AND "
              + "h.requestStatus=1", HolidayRequest.class)
         		 .setParameter("fromDate", fromDate)
-        		 .setParameter("toDate", toDate)
-        		 .setParameter("departmentId", departmentId);
+        		 .setParameter("toDate", toDate);
     	 List<HolidayRequest> resultList = query.getResultList();
     	 var distinctList = resultList.stream().distinct().collect(Collectors.toList());
     	 return distinctList.size() >= minimumReq;
@@ -280,8 +278,7 @@ public class HolidayManagementDTO {
 
     public int getTotalEmployeeByDept(int departmentId) {
     	TypedQuery<Employee> query = em.createQuery(
-    			"SELECT e from Employee WHERE e.department = :departmentId",Employee.class)
-    			.setParameter("departmentId", departmentId);
+    			"SELECT e from Employee WHERE e.department = "+departmentId,Employee.class);
     	List<Employee> resultList = query.getResultList();
     	return resultList.size();
     }

@@ -247,7 +247,7 @@ public class HolidayManagementServlet extends HttpServlet {
 			String fromdate = request.getParameter("fromdate");
 			String todate = request.getParameter("todate");
 			Employee employee = (Employee) userSession.getAttribute("employeeDetail");
-			Department empDept = employee.getDepartment();
+			int depId = employee.getDepartment().getDepartmentId();
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			Boolean noConstraints = false;
 			try {
@@ -258,7 +258,7 @@ public class HolidayManagementServlet extends HttpServlet {
 				}
 				else {
 					boolean checkHolidayRemaining = isHolidayRemaining(employee,fdate,tdate);
-					boolean checkHeadOrDeputyHead = hmDTO.checkHeadOrDeputyHeadOnDuty(fdate,tdate,empDept.getDepartmentId());
+					boolean checkHeadOrDeputyHead = hmDTO.checkHeadOrDeputyHeadOnDuty(fdate,tdate,depId);
 					boolean checkMinimumStaff = isMinimumStaffPresent(employee.getDepartment().getDepartmentId(),fdate,tdate);
 				}
 				
