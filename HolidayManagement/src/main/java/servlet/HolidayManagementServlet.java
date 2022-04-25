@@ -75,6 +75,8 @@ public class HolidayManagementServlet extends HttpServlet {
 		HttpSession userSession = request.getSession();
 		//checkDates();
 		
+		
+		
 		switch(param_action) {
 		//login
 		case "login":
@@ -189,12 +191,29 @@ public class HolidayManagementServlet extends HttpServlet {
 		}
 		break;
 		
-		case "filter":
+		case "filterName":
 		{
 			String name = request.getParameter("filterByName");
-			filterData(request,response,name.toLowerCase());
-			break;
+			filterData(request,response,name,null);
+			break;		
 		}
+		
+		case "filterDate":
+		{
+			
+			String date = request.getParameter("dateOfWorking");
+			filterData(request,response,null,date);
+			break;		
+		}
+		
+		case "filterNameDate":
+		{
+			String name = request.getParameter("filterByName");
+			String date = request.getParameter("dateOfWorking");
+			filterData(request,response,name,date);
+			break;		
+		}
+		
 		
 		case "viewRequestByEmployee":
 		{
@@ -236,9 +255,11 @@ public class HolidayManagementServlet extends HttpServlet {
 				if(AllDates.contains(convertToLocalDateViaInstant(fdate)) && AllDates.contains(convertToLocalDateViaInstant(tdate))) {
 					noConstraints=true;
 				}
-				
-				boolean checkHolidayRemaining = isHolidayRemaining(employee,fdate,tdate);
-				//boolean checkHeadOrDeputyHead = checkHeadOrDeputyHeadonDuty(fdate,tdate);
+				else {
+					boolean checkHolidayRemaining = isHolidayRemaining(employee,fdate,tdate);
+					boolean checkHeadOrDeputyHead = hmDTO.checkHeadOrDeputyHeadOnDuty(fdate,tdate,employee.getDepartment().getDepartmentId());
+					boolean checkMinimumStaff = isMinimumStaffPresent(employee.getDepartment().getDepartmentId(),fdate,tdate);
+				}
 				
 				hmDTO.submitRequest(reason, fdate, tdate,employee,noConstraints);
 				
@@ -323,23 +344,81 @@ public class HolidayManagementServlet extends HttpServlet {
 		        dispatcher.forward(request, response);
 		    }
 	
-	private void filterData(HttpServletRequest request, HttpServletResponse response,String name) throws ServletException, IOException{
-		if(name!=null) {
-			var flist = listHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+	private void filterData(HttpServletRequest request, HttpServletResponse response,String name,String date) throws ServletException, IOException{
+		
+		if(name!=null && name !="" && date==null) {
+			 var flist = listHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 			 request.setAttribute("listHolidayRequest", flist);
 			 
-			 var alist = listApprovedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+			 var alist = listApprovedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 			 request.setAttribute("allApprovedRequestList", alist);
 			 
-			 var rlist = listRejectedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+			 var rlist = listRejectedHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 		     request.setAttribute("allRejectedRequestList", rlist);
 		        
-		     var clist = listCancelledHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name)).collect(Collectors.toList());
+		     var clist = listCancelledHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 		     request.setAttribute("allCancelledHolidayRequest", clist);
 		     
 		     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 			 dispatcher.forward(request, response);
 		}
+		else if(name==null && date!=null) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Date fdate;
+			try {
+				fdate = formatter.parse(date);
+				var flist = listHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+				 request.setAttribute("listHolidayRequest", flist);
+				 
+				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+				 request.setAttribute("allApprovedRequestList", alist);
+				 
+				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+			     request.setAttribute("allRejectedRequestList", rlist);
+			        
+			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+			     request.setAttribute("allCancelledHolidayRequest", clist);
+			     
+			     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
+				 dispatcher.forward(request, response);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		else if(name!=null && date!=null && name !="") {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Date fdate;
+			try {
+				fdate = formatter.parse(date);
+				var flist = listHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0 
+						&& s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+				 request.setAttribute("listHolidayRequest", flist);
+				 
+				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0
+						 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+				 request.setAttribute("allApprovedRequestList", alist);
+				 
+				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0
+						 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+			     request.setAttribute("allRejectedRequestList", rlist);
+			        
+			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0 
+			    		 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
+			     request.setAttribute("allCancelledHolidayRequest", clist);
+			     
+			     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
+				 dispatcher.forward(request, response);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
+		}
+		
 	}
 	
 	private void listEmployeeRequest(HttpServletRequest request, HttpServletResponse response)
@@ -468,9 +547,12 @@ public class HolidayManagementServlet extends HttpServlet {
 			 return true;
 	 }
 	 
-//	 public boolean checkHeadOrDeputyHeadonDuty(Date fDate,Date tDate) {
-//		 
-//	 }
-	 
+	 public boolean isMinimumStaffPresent(int departmentId,Date fDate,Date tDate) {
+		 int noOfEmp =hmDTO.getTotalEmployeeByDept(departmentId);
+		 int minReque = (int) Math.round(noOfEmp*0.6); //Since 60%
+		 return hmDTO.isMaximumStaffOnHoliday(fDate, tDate, departmentId, minReque) ? false : true ;
+		 
+		 
+	 }
 	 
 }

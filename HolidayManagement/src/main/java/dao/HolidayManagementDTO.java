@@ -6,7 +6,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -18,6 +23,7 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpSession;
 
+import model.Admin;
 import model.Department;
 import model.Employee;
 import model.HolidayRequest;
@@ -181,8 +187,16 @@ public class HolidayManagementDTO {
     	
     	c.setDepartment(a);
     	c.setRole(w);
-    	
     	em.persist(c);
+    	try {
+    		em.persist(c);
+    		em.flush();
+    		if(c.getRole().getRoleId() == 1 || c.getRole().getRoleId() == 6) {
+    			insertIntoAdmin(c);
+    		}
+    	}
+    	catch(Exception e) {
+    	}
     }
     
     public boolean addNewEmployee(String idDepartment, String idRole, String firstName, String lastName, String dob,String phone, String employeeEmail, String password) {
@@ -204,6 +218,10 @@ public class HolidayManagementDTO {
         	c.setRole(w);
         	try {
         		em.persist(c);
+        		em.flush();
+        		if(c.getRole().getRoleId() == 1) {
+        			insertIntoAdmin(c);
+        		}
         		return true;
         	}
         	catch(Exception e) {
@@ -216,6 +234,12 @@ public class HolidayManagementDTO {
     	
     }
     
+    public void insertIntoAdmin(Employee employeeObj) {
+    	Admin a = new Admin();
+    	a.setEmployee(employeeObj);
+    	em.persist(a);
+    }
+    
     public void updateEmployee(Employee employeeObj) 
     {
     	em.find(Employee.class, employeeObj.getEmployeeId());
@@ -223,10 +247,60 @@ public class HolidayManagementDTO {
     	
     }
     
-//    public boolean checkHeadOrDeputyHeadOnDuty(int departmentId,Date fromdate, Date todate) {
-//    	
-//    	
-//    }
+    public boolean checkHeadOrDeputyHeadOnDuty(Date fromDate,Date toDate,int departmentId) {
+    	 TypedQuery<HolidayRequest> query 
+         = em.createQuery(
+             "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
+             + "((h.fromDate between :fromDate and :toDate) OR "
+             + "(h.toDate between :fromDate and :toDate)) AND "
+             + "e.department = :departmentId AND "
+             + "e.role in (1,2) AND h.requestStatus=1", HolidayRequest.class)
+        		 .setParameter("fromDate", fromDate)
+        		 .setParameter("toDate", toDate)
+        		 .setParameter("departmentId", String.valueOf(departmentId));
+       List<HolidayRequest> resultList = query.getResultList();
+       return resultList.stream().distinct().collect(Collectors.toList()).size() > 1;
+    }
+    
+    public boolean isMaximumStaffOnHoliday(Date fromDate,Date toDate,int departmentId,int minimumReq) {
+    	 TypedQuery<HolidayRequest> query 
+         = em.createQuery(
+             "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
+             + "((h.fromDate between :fromDate and :toDate) OR "
+             + "(h.toDate between :fromDate and :toDate)) AND "
+             + "e.department = :departmentId AND "
+             + "h.requestStatus=1", HolidayRequest.class)
+        		 .setParameter("fromDate", fromDate)
+        		 .setParameter("toDate", toDate)
+        		 .setParameter("departmentId", departmentId);
+    	 List<HolidayRequest> resultList = query.getResultList();
+    	 var distinctList = resultList.stream().distinct().collect(Collectors.toList());
+    	 return distinctList.size() >= minimumReq;
+    }
+
+    public int getTotalEmployeeByDept(int departmentId) {
+    	TypedQuery<Employee> query = em.createQuery(
+    			"SELECT e from Employee WHERE e.department = :departmentId",Employee.class)
+    			.setParameter("departmentId", departmentId);
+    	List<Employee> resultList = query.getResultList();
+    	return resultList.size();
+    }
+    
+    public boolean checkManagerOrSeniorStaffOnDuty(Date fromDate,Date toDate,int departmentId) {
+   	 TypedQuery<HolidayRequest> query 
+        = em.createQuery(
+            "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
+            + "((h.fromDate between :fromDate and :toDate) OR "
+            + "(h.toDate between :fromDate and :toDate)) AND "
+            + "e.department = :departmentId AND "
+            + "e.role in (3,6) AND h.requestStatus=1", HolidayRequest.class)
+       		 .setParameter("fromDate", fromDate)
+       		 .setParameter("toDate", toDate)
+       		 .setParameter("departmentId", departmentId);
+      List<HolidayRequest> resultList = query.getResultList();
+      return resultList.size() > 1;
+   }
+    
     
     
     

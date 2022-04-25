@@ -21,21 +21,39 @@
 		
 		
 		<br/>
+		Filter by Date: <input type = "date" name = "dateOfWorking">
 		
 		<br/>
+		
 		<input type = "submit" value = "Select" />
 	</form>
 	<%
-		if (request.getParameter("filterByName") != null)
+		if (request.getParameter("filterByName") != null || request.getParameter("dateOfWorking") != null)
 		{
-			RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=filter");
-			request.setAttribute("action", "filter");
-			request.setAttribute("filterByName", request.getParameter("filterByName"));
-			rd.forward(request, response);
+			if(request.getParameter("filterByName") != null && (request.getParameter("dateOfWorking") == null || request.getParameter("dateOfWorking") == "")){
+				RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=filterName");
+				request.setAttribute("action", "filterName");
+				request.setAttribute("filterByName", request.getParameter("filterByName"));
+				rd.forward(request, response);
+			}
+			else if(request.getParameter("filterByName") == null && (request.getParameter("dateOfWorking") != null && request.getParameter("dateOfWorking") != "")){
+				RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=filterDate");
+				request.setAttribute("action", "filterDate");
+				request.setAttribute("dateOfWorking", request.getParameter("dateOfWorking"));
+				rd.forward(request, response);
+			}
+			else if(request.getParameter("filterByName") != null && (request.getParameter("dateOfWorking") != null && request.getParameter("dateOfWorking") != "")){
+				RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=filterNameDate");
+				request.setAttribute("action", "filterNameDate");
+				request.setAttribute("filterByName", request.getParameter("filterByName"));
+				request.setAttribute("dateOfWorking", request.getParameter("dateOfWorking"));
+				rd.forward(request, response);
+			}
 			
 		}
 		
 	%>
+	
 	 <%-- <%
 		if (request.getParameter("cbxEmployee") != null) {
 			response.sendRedirect("HolidayManagementServlet?action=viewRequestByEmployee" + "&employeeID=" + 
