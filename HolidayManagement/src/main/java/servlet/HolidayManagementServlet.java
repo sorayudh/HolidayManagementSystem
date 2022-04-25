@@ -46,6 +46,7 @@ public class HolidayManagementServlet extends HttpServlet {
     List<HolidayRequest> listRejectedHolidayRequest;
     List<HolidayRequest> listCancelledHolidayRequest;
     List<HolidayRequest> listEmployeeRequest;
+    List<HolidayRequest> listHolidayRequestBreakingConstraints;
     List<Employee> allUserList;
 	private static final long serialVersionUID = 1L;
 	
@@ -61,6 +62,7 @@ public class HolidayManagementServlet extends HttpServlet {
         listApprovedHolidayRequest = new ArrayList<HolidayRequest>();
         listRejectedHolidayRequest = new ArrayList<HolidayRequest>();
         listCancelledHolidayRequest = new ArrayList<HolidayRequest>();
+        listHolidayRequestBreakingConstraints = new ArrayList<HolidayRequest>();
         allUserList = new ArrayList<Employee>();
         checkDates();
     }
@@ -301,7 +303,10 @@ public class HolidayManagementServlet extends HttpServlet {
 			approveOrRejectRequest(request, response,"approve");
 		}
 		break;
-		
+		case "cancelRequest":
+		{
+			approveOrRejectRequest(request, response,"cancel");
+		}
 		case "employeeRequestList":
 		{
 			listEmployeeRequest(request, response);
@@ -320,6 +325,9 @@ public class HolidayManagementServlet extends HttpServlet {
 			}
 			else if(param_action.contains("rejectRequest")) {
 				approveOrRejectRequest(request, response,"reject");
+			}
+			else if(param_action.contains("cancelRequest")) {
+				approveOrRejectRequest(request, response,"cancel");
 			}
 		}
 		response.setContentType("text/html;charset=UTF-8");
@@ -359,7 +367,7 @@ public class HolidayManagementServlet extends HttpServlet {
 	
 	private void filterData(HttpServletRequest request, HttpServletResponse response,String name,String date) throws ServletException, IOException{
 		
-		if(name!=null && name !="" && date==null) {
+		if((name!=null || name !="") && date==null) {
 			 var flist = listHolidayRequest.stream().filter(s-> s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 			 request.setAttribute("listHolidayRequest", flist);
 			 
@@ -375,21 +383,21 @@ public class HolidayManagementServlet extends HttpServlet {
 		     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 			 dispatcher.forward(request, response);
 		}
-		else if(name==null && date!=null) {
+		else if((name==null|| name=="") && date!=null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			Date fdate;
 			try {
 				fdate = formatter.parse(date);
-				var flist = listHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+				var flist = listHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())).collect(Collectors.toList());
 				 request.setAttribute("listHolidayRequest", flist);
 				 
-				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())).collect(Collectors.toList());
 				 request.setAttribute("allApprovedRequestList", alist);
 				 
-				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())).collect(Collectors.toList());
 			     request.setAttribute("allRejectedRequestList", rlist);
 			        
-			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0).collect(Collectors.toList());
+			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())).collect(Collectors.toList());
 			     request.setAttribute("allCancelledHolidayRequest", clist);
 			     
 			     RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
@@ -400,24 +408,24 @@ public class HolidayManagementServlet extends HttpServlet {
 			}
 		}
 		
-		else if(name!=null && date!=null && name !="") {
+		else if((name!=null && name !="") && date!=null ) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			Date fdate;
 			try {
 				fdate = formatter.parse(date);
-				var flist = listHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0 
+				var flist = listHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate()) 
 						&& s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 				 request.setAttribute("listHolidayRequest", flist);
 				 
-				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0
+				 var alist = listApprovedHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())
 						 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 				 request.setAttribute("allApprovedRequestList", alist);
 				 
-				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0
+				 var rlist = listRejectedHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate())
 						 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 			     request.setAttribute("allRejectedRequestList", rlist);
 			        
-			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.compareTo(s.getFromDate()) * fdate.compareTo(s.getToDate()) >= 0 
+			     var clist = listCancelledHolidayRequest.stream().filter(s-> fdate.after(s.getFromDate()) && fdate.before(s.getToDate()) 
 			    		 && s.getEmployee().getFirstName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toList());
 			     request.setAttribute("allCancelledHolidayRequest", clist);
 			     
@@ -446,7 +454,10 @@ public class HolidayManagementServlet extends HttpServlet {
 	
 	private void listHolidayRequest(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException{
-		        listHolidayRequest = hmDTO.getAllHolidayRequest();
+		        var allList = hmDTO.getAllHolidayRequest();
+		       
+		        listHolidayRequest = allList.stream().filter(s->s.getBreakingConstraints() != 1).collect(Collectors.toList());
+		        listHolidayRequestBreakingConstraints = allList.stream().filter(s->s.getBreakingConstraints() == 1).collect(Collectors.toList());
 		        listApprovedHolidayRequest = hmDTO.allApprovedRequest();
 		        listRejectedHolidayRequest = hmDTO.allRejectedRequest();
 		        listCancelledHolidayRequest = hmDTO.allCancelledRequest();
@@ -455,6 +466,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		        request.setAttribute("allApprovedRequestList", listApprovedHolidayRequest);
 		        request.setAttribute("allRejectedRequestList", listRejectedHolidayRequest);
 		        request.setAttribute("allCancelledHolidayRequest", listCancelledHolidayRequest);
+		        request.setAttribute("listHolidayRequestBreakingConstraints", listHolidayRequestBreakingConstraints);
 
 		        HttpSession session = request.getSession();
 				session.setAttribute("userList", allUserList);
@@ -463,17 +475,26 @@ public class HolidayManagementServlet extends HttpServlet {
 		    }
 	
 	private void approveOrRejectRequest(HttpServletRequest request, HttpServletResponse response,String toDo)
-		    throws IOException {
+		    throws IOException, ServletException {
 		 var id = request.getQueryString().substring(request.getQueryString().lastIndexOf("holidayRequestId=")+17);
 		 int holidayRequestId = Integer.parseInt(id);
 		 if(toDo=="approve") {
 			 hmDTO.approveRequest(holidayRequestId);
+			 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
 		 }
 		 else if(toDo=="reject") {
 			 hmDTO.rejectRequest(holidayRequestId);
+			 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
+		 }
+		 else if(toDo=="cancel") {
+			 hmDTO.cancelRequest(holidayRequestId);
+			 listEmployeeRequest(request, response);
+			 //RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
+		      //dispatcher.forward(request, response);
+			 //response.sendRedirect("HolidayManagementServlet?action=listEmployeeRequest");
 		 }
 		
-		 response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
+		 //response.sendRedirect("HolidayManagementServlet?action=listHolidayRequests");
 		    }
 	
 		 private void deleteUser(HttpServletRequest request, HttpServletResponse response)

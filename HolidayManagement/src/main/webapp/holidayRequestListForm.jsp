@@ -73,6 +73,60 @@
 	
     </section>
     
+    <section>
+	<h2>List of Holiday Request Breaking Contraints</h2>
+  <div class="tbl-header">
+    <table cellpadding="0" cellspacing="0" border="0">
+      <thead>
+        <tr>
+         <th>Request ID</th>
+                <th>Employee First Name</th>
+                <th>Request Status</th>
+                <%-- <th>No Constraint time</th> --%>
+                <th>Request Time</th>
+                <th>Breaking Constraints</th>
+                <th>Reason</th>
+                <th>Total Days</th>
+                <th>From Date</th>
+                <th>To Date</th>
+                <th>Priority</th>
+                
+                <th>Action</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  
+  <div class="tbl-content">
+    <table cellpadding="0" cellspacing="0" border="0">
+      <tbody>
+        <c:forEach var="holidayrequest" items="${listHolidayRequestBreakingConstraints}">
+                <tr>
+                    <td><c:out value="${holidayrequest.holidayRequestId}" /></td>
+                    <td><c:out value="${holidayrequest.getEmployee().firstName}" /></td>
+                    <td><c:out value="${holidayrequest.getRequestStatus().status}" /></td>
+                    <%-- <td><c:out value="${holidayrequest.noConstraintTime}" /></td> --%> 
+                    <td><c:out value="${holidayrequest.requestTime}" /></td>
+                   <td><c:out value="${holidayrequest.getRequestWithConstraints().get(0).getConstraint().constraint}" /></td>
+                    <td><c:out value="${holidayrequest.reason}" /></td>
+                    <td><c:out value="${holidayrequest.totalDays}" /></td>
+                    <td><c:out value="${holidayrequest.fromDate}" /></td>
+                    <td><c:out value="${holidayrequest.toDate}" /></td>
+                    <td><c:out value="${holidayrequest.priority}" /></td>
+                  
+                    <td>
+                     <c:if test="${holidayrequest.getRequestStatus().requestStatusId != 1 && holidayrequest.getRequestStatus().requestStatusId != 2 && holidayrequest.getRequestStatus().requestStatusId != 4 }">
+                    	<a href="HolidayManagementServlet?action=rejectRequest?holidayRequestId=<c:out value='${holidayrequest.holidayRequestId}' />">Reject</a>
+                    	</c:if>                    	
+                    </td>
+                </tr>
+            </c:forEach>
+      </tbody>
+    </table>
+  </div>
+	
+    </section>
+    
     
     
     <section>

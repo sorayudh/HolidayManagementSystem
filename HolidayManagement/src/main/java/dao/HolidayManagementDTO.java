@@ -135,16 +135,36 @@ public class HolidayManagementDTO {
         return getHolidayList(query.getResultList());
     }
     
+    public List<RequestWithConstraint> getRequestWithContraintList(List output){
+    	 List<RequestWithConstraint> listResult = new ArrayList<RequestWithConstraint>();
+    	 for(int i = 0; i < output.size(); i++)
+     	{
+    		RequestWithConstraint e = new RequestWithConstraint();
+     		e = (RequestWithConstraint)output.get(i);
+     		listResult.add(e);
+     	}
+         return listResult;
+    }
+    
     public List<HolidayRequest> getHolidayList(List output){
    	 List<HolidayRequest> listResult = new ArrayList<HolidayRequest>();
    	 for(int i = 0; i < output.size(); i++)
     	{
         	HolidayRequest e = new HolidayRequest();
     		e = (HolidayRequest)output.get(i);
+    		if(e.getBreakingConstraints() == 1) {
+    			e.setRequestWithConstraints(getRequestWithContraint(e.getHolidayRequestId()));
+    		}
     		listResult.add(e);
     	}
         return listResult;
    }
+    
+    public List<RequestWithConstraint> getRequestWithContraint(int holidayRequestId){
+    	Query query = em.createQuery("SELECT r FROM RequestWithConstraint r" 
+    	          + " WHERE r.holidayRequest = "+holidayRequestId);
+    	        return getRequestWithContraintList(query.getResultList());
+    }
     
     public Employee getEmployeeDetail(int employeeId){
     	Employee employee =  em.find(Employee.class, employeeId); 
@@ -323,6 +343,12 @@ public class HolidayManagementDTO {
     public void rejectRequest(int holidayRequestId){
     	HolidayRequest hr = em.find(HolidayRequest.class,holidayRequestId);
     	hr.setRequestStatus(em.find(RequestStatus.class, 2));
+    	em.merge(hr);
+    }
+    
+    public void cancelRequest(int holidayRequestId){
+    	HolidayRequest hr = em.find(HolidayRequest.class,holidayRequestId);
+    	hr.setRequestStatus(em.find(RequestStatus.class, 4));
     	em.merge(hr);
     }
     
