@@ -251,7 +251,7 @@ public class HolidayManagementDTO {
     }
     
     public boolean checkHeadOrDeputyHeadOnDuty(Date fromDate,Date toDate,int departmentId) {
-    	 TypedQuery<HolidayRequest> q	uery 
+    	 TypedQuery<HolidayRequest> query 
          = em.createQuery(
              "SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND "
              + "((h.fromDate between :fromDate and :toDate) OR "
