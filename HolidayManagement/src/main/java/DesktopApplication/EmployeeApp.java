@@ -8,11 +8,23 @@ import javax.swing.JOptionPane;
 
 import java.awt.FlowLayout;
 import javax.swing.JTextField;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.awt.event.ActionEvent;
 
 public class EmployeeApp {
@@ -74,13 +86,12 @@ public class EmployeeApp {
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(tfUsername.getText() != null && String.valueOf(passwordField.getPassword()) !=null) {
-					var isValidUser = checkValidUser(tfUsername.getText(),String.valueOf(passwordField.getPassword()));
-					if(isValidUser) {
-						JOptionPane.showMessageDialog(null, "Login Success");
+					var employeeId = checkValidUser(tfUsername.getText(),String.valueOf(passwordField.getPassword()));
+					if(employeeId!=0) {
 						tfUsername.setText(null);
 						passwordField.setText(null);
 						HolidayRequest hr = new HolidayRequest();
-						hr.main(null);
+						hr.main(null,employeeId);
 					}
 					else {
 						showErrorMessage();
@@ -101,11 +112,55 @@ public class EmployeeApp {
 		frmEmployeeLogin.getContentPane().add(btnLogin);
 	}
 	
-	public boolean checkValidUser(String username,String password) {
-		if (username.equals("admin") && password.equals("admin"))
-			return true;
-		else
-			return false;
+	public int checkValidUser(String username,String password) {
+		
+		try {
+			 String url = "http://localhost:8180/HolidayManagement/EmployeeService";
+			 URL obj = new URL(url);
+			 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			 con.setRequestMethod("GET");
+			 con.setRequestProperty("Content-Type","application/soap+xml; charset=utf-8");
+			 
+			 String xml = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://service/\">\r\n"
+			 		+ "   <soapenv:Header/>\r\n"
+			 		+ "   <soapenv:Body>\r\n"
+			 		+ "      <ser:verifyLoginUser>\r\n"
+			 		+ "         <arg0>"+username+"</arg0>\r\n"
+			 		+ "         <arg1>"+password+"</arg1>\r\n"
+			 		+ "      </ser:verifyLoginUser>\r\n"
+			 		+ "   </soapenv:Body>\r\n"
+			 		+ "</soapenv:Envelope>";
+			 con.setDoOutput(true);
+			 DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+			 wr.writeBytes(xml);
+			 wr.flush();
+			 wr.close();
+			 String responseStatus = con.getResponseMessage();
+			 System.out.println(responseStatus);
+			 BufferedReader in = new BufferedReader(new InputStreamReader(
+			 con.getInputStream()));
+			 String inputLine;
+			 StringBuffer response = new StringBuffer();
+			 while ((inputLine = in.readLine()) != null) {
+			 response.append(inputLine);
+			 }
+			 in.close();
+			 String toBeSearched = "<return>";
+			 String id = response.toString().substring(response.toString().indexOf(toBeSearched) + toBeSearched.length());
+			 String employeeId = id.split("</return>")[0];
+			 System.out.println("response:" + response.toString());
+			 if(employeeId.equals("0")) {
+				 return 0;
+			 }
+			 else
+				 return Integer.parseInt(employeeId);
+			 } 
+		catch (Exception e) {
+			 System.out.println(e);
+			 return 0;
+		}
+		
+		
 	}
 	public void showErrorMessage() {
 		JOptionPane.showMessageDialog(null,"Invalid Login Details","Login Error",JOptionPane.ERROR_MESSAGE);
