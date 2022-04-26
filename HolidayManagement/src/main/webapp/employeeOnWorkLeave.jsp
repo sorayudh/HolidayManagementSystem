@@ -4,23 +4,20 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Admin Home</title>
+<title>List Employee on work and leave</title>
 </head>
 <body>
 <div class="wrapper">
     <div class="container">
-        
-
-        <form class="form">
-          <h2>Welcome to Home Page</h2>
-
-<%-- 
-<a href='HolidayManagementServlet?action=showAllEmployee'>View All Employees</a><br/>
---%>
-<a href='HolidayManagementServlet?action=addEmployee'>Add a New Employee</a><br/>
-<a href='HolidayManagementServlet?action=listUsers'>Employee List</a><br/>
-<a href='HolidayManagementServlet?action=listHolidayRequests'>Holiday Request List</a><br/>
-<a href='HolidayManagementServlet?action=employeesOnWorkLeave'>Employee on work and leave</a><br/>
+        <h1>List Employee on work and leave by date</h1>
+		<form action="employeeOnWorkLeave.jsp" method = "GET">
+		
+		<br/>
+		Filter by Date: <input type = "date" placeholder="Select Date" id="filterByDate" name = "filterByDate">
+		<br/>
+		
+		<input type = "submit" value = "Select" />
+     
 
         </form>
     </div>
@@ -38,13 +35,33 @@
         <li></li>
     </ul>
 </div>
+
+<%
+		if (request.getParameter("filterByDate") != null)
+		{
+			RequestDispatcher rd = request.getRequestDispatcher("HolidayManagementServlet?action=getEmployeeByDate");
+			request.setAttribute("action", "getEmployeeByDate");
+			request.setAttribute("filterByDate", request.getParameter("filterByDate"));
+			rd.forward(request, response);
+			
+		}
+		
+	%>
+
 </body>
-
 </html>
-
 
 <style>
 
+#filterByDate {
+  background-position: 10px 10px;
+  background-repeat: no-repeat;
+  width: 50%%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
 a:link {
    -webkit-appearance: none;
         -moz-appearance: none;

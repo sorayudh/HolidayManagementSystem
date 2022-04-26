@@ -175,7 +175,24 @@ public class HolidayManagementDTO {
     	List<Employee> listEmployee = em.createNamedQuery("Employee.findAll", Employee.class).getResultList();
     	return listEmployee;
     }
+    //SELECT h FROM HolidayRequest h, Employee e WHERE h.employee = e AND 
+    public List<Employee> getAllEmployeeNotWorking(String date){
+    	TypedQuery<Employee> query 
+        = em.createQuery(
+            "SELECT e FROM Employee e, HolidayRequest h WHERE h.employee = e AND '"+date+ "' BETWEEN h.fromDate AND h.toDate", Employee.class);
+    	List<Employee> resultList = query.getResultList();
+    	var distinctList = resultList.stream().distinct().collect(Collectors.toList());
+    	return distinctList;
+    }
     
+    public List<Employee> getAllEmployeeWorking(String date){
+    	TypedQuery<Employee> query 
+        = em.createQuery(
+            "SELECT e FROM Employee e, HolidayRequest h WHERE h.employee = e AND '"+date+ "' NOT BETWEEN h.fromDate AND h.toDate", Employee.class);
+    	List<Employee> resultList = query.getResultList();
+    	var distinctList = resultList.stream().distinct().collect(Collectors.toList());
+    	return distinctList;
+    }
   
     
     public List<Department> allDepartment()

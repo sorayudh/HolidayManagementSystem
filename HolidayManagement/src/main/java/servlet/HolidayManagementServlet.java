@@ -59,6 +59,8 @@ public class HolidayManagementServlet extends HttpServlet {
     List<HolidayRequest> listEmployeeRequest;
     List<HolidayRequest> listHolidayRequestBreakingConstraints;
     List<Employee> allUserList;
+    List<Employee> allWorkingUserList;
+    List<Employee> allNotWorkingUserList;
 	private static final long serialVersionUID = 1L;
 	
        
@@ -256,6 +258,18 @@ public class HolidayManagementServlet extends HttpServlet {
 			updateUser(request,response);
 		}
 		break;
+		
+		case "getEmployeeByDate":{
+			try {
+				String selectedDate = request.getParameter("filterByDate");
+				getEmployeeListFromDate(request, response,selectedDate);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		break;
+		
 		case "submitRequest":
 		{
 			
@@ -320,6 +334,11 @@ public class HolidayManagementServlet extends HttpServlet {
 	          
 		}
 		break;
+		case "employeesOnWorkLeave":
+		{
+			RequestDispatcher dispatcher = request.getRequestDispatcher("employeeOnWorkLeave.jsp");
+			dispatcher.forward(request, response);
+		}
 		case "approveRequest":
 		{
 			approveOrRejectRequest(request, response,"approve");
@@ -367,6 +386,15 @@ public class HolidayManagementServlet extends HttpServlet {
 		out.close();
 	}
 
+	public void getEmployeeListFromDate(HttpServletRequest request, HttpServletResponse response,String selectedDate) throws Exception, Throwable {
+		allNotWorkingUserList = hmDTO.getAllEmployeeNotWorking(selectedDate);
+		allWorkingUserList= hmDTO.getAllEmployeeWorking(selectedDate);
+        request.setAttribute("notWorkingUsers", allNotWorkingUserList);
+        request.setAttribute("workingUsersList", allWorkingUserList);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("employeeOnWorkLeaveList.jsp");
+        dispatcher.forward(request, response);
+        
+	}
 	
 	public void sendMessage(Employee e) throws JMSException, NamingException {
 		Context jndiContext;
@@ -512,6 +540,7 @@ public class HolidayManagementServlet extends HttpServlet {
 		        RequestDispatcher dispatcher = request.getRequestDispatcher("holidayRequestListForm.jsp");
 		        dispatcher.forward(request, response);
 		    }
+	
 	
 	private void approveOrRejectRequest(HttpServletRequest request, HttpServletResponse response,String toDo)
 		    throws IOException, ServletException {
